@@ -52,10 +52,10 @@ flowchart TD
 ### 2. 5 Specialist Sub-Agents
 | Specialist | Role | Key Tools |
 |---|---|---|
-| **`shipment_tracker`** | End-to-end tracking, lifecycle state, carrier telematics, ETAs | `track_shipment`, `create_shipment`, `update_shipment_status`, `cancel_shipment`, `calculate_eta` |
+| **`shipment_tracker`** | End-to-end tracking, lifecycle state, barcode/label vision scanning, ETAs | `track_shipment`, `inspect_shipping_document_or_image`, `create_shipment`, `update_shipment_status`, `calculate_eta` |
 | **`route_planner`** | Optimal route calculation, shipping cost breakdown, fuel & transit analysis | `calculate_route`, `estimate_shipping_cost`, `calculate_distance`, `calculate_fuel_cost`, `calculate_shipping_rate` |
 | **`inventory_manager`** | Warehouse SKU audits, restock triggers, capacity utilization | `check_inventory`, `reorder_stock`, `calculate_warehouse_capacity` |
-| **`issue_resolver`** | Damages, missing shipments, SLA breach containment, resolution plans | `log_issue`, `generate_resolution`, `track_shipment` |
+| **`issue_resolver`** | Damage OCR inspection, autonomous emergency dispatch, SLA plans | `inspect_shipping_document_or_image`, `dispatch_autonomous_carrier`, `log_issue`, `generate_resolution`, `track_shipment` |
 | **`analytics_agent`** | Daily/weekly KPI summaries, anomaly detection, data computation | `generate_report`, `run_python_code`, `aggregate_metrics` |
 
 ### 3. Self-Correcting Persistent Learning
@@ -94,6 +94,9 @@ uv run adk run logiflow "Check inventory status for warehouse WH-001"
 
 # Damaged Cargo & Resolution SLA
 uv run adk run logiflow "Log an issue: Package SHP-2026-4521 arrived with severe box damage and broken items"
+
+# Multimodal Document / Damage OCR & Autonomous Dispatch
+uv run adk run logiflow "Please inspect the photo at test_damaged_parcel_label.png and resolve the issue"
 
 # Executive Business Intelligence & KPI Reports
 uv run adk run logiflow "Show me the daily summary performance report for warehouse WH-001"

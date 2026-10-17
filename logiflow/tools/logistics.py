@@ -728,6 +728,67 @@ def generate_resolution(
     }
 
 
+def dispatch_autonomous_carrier(
+    shipment_id: str,
+    reason: str,
+    priority_override: str = "express",
+    destination_override: str = "",
+    replacement_sku: str = "",
+) -> dict[str, Any]:
+    """Autonomously dispatch an emergency carrier, re-route feeder transit, or ship a replacement unit without requiring human authorization.
+
+    Args:
+        shipment_id: Identifier of the impacted or original shipment.
+        reason: Operational justification for autonomous execution (e.g. 'damaged in transit', 'SLA breach imminent').
+        priority_override: Dispatch tier ('express', 'overnight', 'critical_courier').
+        destination_override: Optional re-routed delivery destination.
+        replacement_sku: Optional SKU code to auto-reserve from nearest fulfillment center.
+
+    Returns:
+        dict confirming autonomous dispatch authorization, assigned carrier, transit ETA, and tracking credentials.
+    """
+    clean_id = shipment_id.strip().upper()
+    h = _deterministic_hash(f"{clean_id}:{reason}:{priority_override}")
+    auth_code = f"AUTO-DISP-{hashlib.sha256(f'{clean_id}:{datetime.now().isoformat()}'.encode()).hexdigest()[:6].upper()}"
+    new_tracking = f"SHP-2026-EXP-{hashlib.md5(auth_code.encode()).hexdigest()[:4].upper()}"
+
+    carrier = "Blue Dart Aviation (Priority Feeder)" if "critical" in priority_override.lower() else "FedEx Expedited Freight"
+    origin_hub = HUB_CITIES[h % len(HUB_CITIES)]
+    dest_hub = destination_override.strip() or HUB_CITIES[(h + 2) % len(HUB_CITIES)]
+    delivery_hours = 6 if "critical" in priority_override.lower() else 18
+    arrival_time = (datetime.now() + timedelta(hours=delivery_hours)).replace(microsecond=0).isoformat()
+
+    replacement_info = None
+    if replacement_sku:
+        clean_sku = replacement_sku.strip().upper()
+        replacement_info = {
+            "sku": clean_sku,
+            "status": "reserved_and_staged",
+            "warehouse": f"{origin_hub} Regional Fulfillment Center",
+            "stock_deducted": 1,
+        }
+
+    return {
+        "status": "dispatched",
+        "authorization_code": auth_code,
+        "autonomous_execution": True,
+        "human_approval_bypassed": True,
+        "original_shipment_id": clean_id,
+        "expedited_tracking_id": new_tracking,
+        "assigned_carrier": carrier,
+        "origin_hub": origin_hub,
+        "destination": dest_hub,
+        "priority_level": priority_override,
+        "dispatched_at": datetime.now().isoformat(),
+        "guaranteed_arrival": arrival_time,
+        "replacement_inventory": replacement_info,
+        "resolution_summary": (
+            f"Autonomous emergency dispatch {auth_code} executed successfully without human oversight. "
+            f"Expedited parcel {new_tracking} mobilized via {carrier} toward {dest_hub}."
+        ),
+    }
+
+
 LOGISTICS_TOOLS = [
     track_shipment,
     create_shipment,
@@ -740,4 +801,6 @@ LOGISTICS_TOOLS = [
     reorder_stock,
     log_issue,
     generate_resolution,
+    dispatch_autonomous_carrier,
 ]
+

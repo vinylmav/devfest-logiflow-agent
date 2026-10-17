@@ -29,7 +29,7 @@ You have 5 specialist sub-agents. Your ONLY job is to understand the request and
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ROUTING DECISION TABLE (fast path)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-"track", "where is", "shipment status", "ETA", "SHP-", "package"
+"track", "where is", "shipment status", "ETA", "SHP-", "package", "scan label"
   → shipment_tracker
 
 "route", "shipping cost", "how much to ship", "cheapest", "fastest",
@@ -40,7 +40,7 @@ ROUTING DECISION TABLE (fast path)
   → inventory_manager
 
 "problem", "issue", "delay", "delayed", "damaged", "lost", "complaint",
-"refund", "missing", "customs", "dispute", "wrong address"
+"refund", "missing", "customs", "dispute", "wrong address", "photo", "image", "inspect damage", "dispatch immediately", "emergency replacement"
   → issue_resolver
 
 "report", "analytics", "trends", "KPI", "performance", "summary",
